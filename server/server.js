@@ -70,7 +70,7 @@ orders = [
 app.get("/api/users", async (req, res) => {
 
     // first send the log to kafka 
-    await logKafka("api/users", "GET", 200);
+    await logKafka("/api/users", "GET", 200, "Displaying the Users!");
     
     // then send the users list response back to the user
     res.json(users); 
@@ -79,7 +79,7 @@ app.get("/api/users", async (req, res) => {
 // 2. Getting the Orders list
 app.get("/api/orders", async (req, res) => {
     // send the log to kafka
-    await logKafka("/api/orders", "GET", 200);
+    await logKafka("/api/orders", "GET", 200, "Displaying the Orders!");
 
     // send the Orders response back to the user
     res.send(orders);
@@ -98,7 +98,7 @@ app.get("/api/users/:id", async (req, res) => {
 
     // if the user exists
     // send the log to kafka
-    await logKafka(`/api/users/${req.params.id}`, "GET", 200);
+    await logKafka(`/api/users/${req.params.id}`, "GET", 200, "Fetching user details!");
 
     // send the user data back
     res.send(userid);
@@ -118,7 +118,7 @@ app.get("/api/orders/:id", async (req, res) => {
     // if the order exists
 
     // first log to kafka 
-    await logKafka(`/api/orders/${req.params.id}`, "GET", 200);
+    await logKafka(`/api/orders/${req.params.id}`, "GET", 200, "Fetching order details!");
 
     // send the order response back
     res.send(orderid);
@@ -128,7 +128,7 @@ app.get("/api/orders/:id", async (req, res) => {
 app.get("/api/products", async (req, res) => {
     
     // first log to kafka
-    await logKafka("/api/products", "GET", 200);
+    await logKafka("/api/products", "GET", 200, "Displaying the products");
 
     // send the products list back to the user
     res.send(products);
