@@ -2,6 +2,7 @@ const bodyParser = require("body-parser");
 const express = require("express");
 const { Kafka } = require("kafkajs");
 const winston = require("winston");
+const client = require("prom-client");
 
 const app = express()
 const PORT = 5000
@@ -15,11 +16,24 @@ const logger = winston.createLogger({
     transports: [new winston.transports.Console()], 
 }); 
 
-
 // kafka setup
 const kafka = new Kafka({
     brokers: ["kafka:9092"]
 });
+
+// setting up the prom client registry for prometheus scraping at the metrics endpoint
+const register = new client.Registry();
+client.collectDefaultMetrics({ register });
+
+// Default counter metric for HTTP requests
+const httpRequestsTotal = new client.Counter({
+    name: 'http_requests_total',
+    help: 'Total number of HTTP requests',
+    labelNames: ['method', 'endpoint', 'status'],
+});
+
+register.registerMetric(httpRequestsTotal);
+register.setDefaultLabels({ app: 'nodejs-server' });
 
 // create a kafka producer and await for its connection
 const producer = kafka.producer()
@@ -45,6 +59,9 @@ async function logKafka(endpoint, method, status, details=null) {
 
     // log the info using the winston logger
     logger.info(`Logged the request: ${JSON.stringify(log)}`);
+
+    // Increment Prometheus counter
+    httpRequestsTotal.inc({ method, endpoint, status });
 }
 
 
@@ -65,6 +82,12 @@ orders = [
 
 
 // creating the routes or the endpoints we have to target
+
+// creating /metrics for prometheus scraping
+app.get('/metrics', async (req, res) => {
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics());
+});
 
 // 1. Getting the Users list
 app.get("/api/users", async (req, res) => {
