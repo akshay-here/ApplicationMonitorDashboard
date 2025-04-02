@@ -57,16 +57,22 @@ services:
     container_name: loki
     ports:
       - "3100:3100"
+    volumes:
+      - ./loki-config.yaml:/etc/loki/config.yaml  # Correct config path
+      - loki_data:/loki  # Persistent storage
     command: -config.file=/etc/loki/local-config.yaml
 
   promtail:
     image: grafana/promtail:latest
     container_name: promtail
     volumes:
-      - /var/log:/var/log
+      - ./promtail.yml:/etc/promtail/config.yml  # Mount config file
+      - /var/log:/var/log:ro  # Ensure correct logs are mounted
     command: -config.file=/etc/promtail/config.yml
     depends_on:
-      - loki
+      loki:
+        condition: service_started  # Ensures Loki is up before Promtail starts
+
 
   prometheus:
     image: prom/prometheus:latest
@@ -74,7 +80,13 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # Config file
+      - prometheus_data:/prometheus  # Persistent storage for metrics
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"  # Keep data for 15 days
+    restart: unless-stopped  # Ensures it restarts automatically
 
   grafana:
     image: grafana/grafana:latest
@@ -92,3 +104,5 @@ services:
 volumes:
   pg_data:
   grafana_data:
+  prometheus_data: 
+  loki_data: 
