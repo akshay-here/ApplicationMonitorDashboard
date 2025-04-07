@@ -67,7 +67,6 @@ services:
     container_name: promtail
     volumes:
       - ./promtail.yml:/etc/promtail/config.yml  # Mount config file
-      # - /var/log:/var/log:ro  # Ensure correct logs are mounted
       - /var/lib/docker/containers:/var/lib/docker/containers  # Mount container logs
       - /var/log:/var/log
     command: -config.file=/etc/promtail/config.yml
@@ -86,8 +85,6 @@ services:
       # - prometheus_data:/prometheus  # Persistent storage for metrics
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
-      # - "--storage.tsdb.path=/prometheus"
-      # - "--storage.tsdb.retention.time=15d"  # Keep data for 15 days
     restart: unless-stopped  # Ensures it restarts automatically
 
   grafana:

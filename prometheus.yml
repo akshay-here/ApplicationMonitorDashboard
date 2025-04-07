@@ -14,8 +14,3 @@ scrape_configs:
       - targets: ['server:5000']  # Ensure your server exposes metrics at /metrics
         labels:
           group: "nodejs-server"
-
-  # # Scrape Loki logs (optional for Promtail logs)
-  # - job_name: 'loki'
-  #   static_configs:
-  #     - targets: ['loki:3100']
