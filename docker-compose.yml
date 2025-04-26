@@ -105,3 +105,8 @@ volumes:
   grafana_data:
   prometheus_data: 
   loki_data: 
+
+  # have to create the database inside the postgress container for the requests to be saved. 
+  # So will have to exec into the postgress container and then 
+  # psql -U user -d logsDB and then create the logs table following the correct column structure
+  # this happens everytime i clear the volumes so everything gets deleted 
